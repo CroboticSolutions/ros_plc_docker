@@ -1,0 +1,30 @@
+services:
+  arms_ws:
+    image: arms_ws:latest
+    build:
+      context: .
+      ssh:
+        - default
+    container_name: arms_ws
+    network_mode: host          # simplest way to get ROS 2/DDS + Gazebo transport discovery working
+    ipc: host                   # shared memory for DDS and X11/GL
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      # Uncomment to persist/edit the workspace source from the host instead
+      # of what's baked into the image:
+      # - ./arms_ws_src:/root/arms_ws/src
+    # Uncomment for NVIDIA GPU-accelerated rendering (needs the NVIDIA
+    # Container Toolkit installed on the host):
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    stdin_open: true
+    tty: true
