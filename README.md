@@ -9,16 +9,18 @@ stack, `ros_plc_sim`, `idustrial_demo_gui`, `ros_gui_bridge`, `serial`,
 and `plc_bridge` (nested inside `plc-ros2-bridge`).
 
 All repos are cloned fresh from GitHub at build time, at the branch each
-one is currently on. **`ros_gui_bridge` is the only private repo** in the
-set -- everything else is public.
+one is currently on. **Two repos are private**: `ros_gui_bridge`, and
+`arm_api2` itself -- the `crx-integration` branch lives on `bb53192`'s
+private fork, not the public `CroboticSolutions/arm_api2` upstream.
+Everything else is public.
 
 ## Build
 
 Requires Docker BuildKit (for SSH-agent forwarding into the build, needed
-to clone the private repo).
+to clone the two private repos).
 
 ```bash
-ssh-add -l                      # make sure a key with ros_gui_bridge access is loaded
+ssh-add -l                      # make sure a key with access to both private repos is loaded
 DOCKER_BUILDKIT=1 docker build --ssh default -t arms_ws:latest .
 ```
 

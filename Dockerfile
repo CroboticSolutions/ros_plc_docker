@@ -108,8 +108,10 @@ RUN git clone --depth 1 -b crx-cell-integration \
 
 WORKDIR /root/arms_ws/src
 
-RUN git clone -b crx-integration https://github.com/CroboticSolutions/arm_api2.git
-RUN git clone -b apirsic/devel    https://github.com/CroboticSolutions/arm_api2_msgs.git
+RUN git clone -b apirsic/devel https://github.com/CroboticSolutions/arm_api2_msgs.git
+
+# arm_api2 itself is cloned from bb53192's fork (crx-integration branch,
+# private) below, alongside ros_gui_bridge -- both need the ssh-agent.
 
 RUN git clone --depth 1 -b jazzy               https://github.com/UniversalRobots/Universal_Robots_ROS2_Description.git && \
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/Universal_Robots_ROS2_Driver.git && \
@@ -122,8 +124,10 @@ RUN git clone --depth 1 -b jazzy               https://github.com/UniversalRobot
     git clone --depth 1 -b pick-on-the-fly     https://github.com/bb53192/ros_plc_sim.git && \
     git clone --depth 1 -b ros2                https://github.com/tylerjw/serial.git
 
-# ros_gui_bridge is private -- needs the forwarded ssh-agent (--ssh default).
+# Private repos -- need the forwarded ssh-agent (--ssh default).
 RUN mkdir -p -m 0700 /root/.ssh && ssh-keyscan github.com >> /root/.ssh/known_hosts
+RUN --mount=type=ssh git clone -b crx-integration \
+    git@github.com:bb53192/arm_api2.git
 RUN --mount=type=ssh git clone --depth 1 -b ros2 \
     git@github.com:CroboticSolutions/ros_gui_bridge.git
 
