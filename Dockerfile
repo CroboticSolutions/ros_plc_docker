@@ -117,7 +117,7 @@ RUN git clone --depth 1 -b jazzy               https://github.com/UniversalRobot
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/Universal_Robots_ROS2_Driver.git && \
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/Universal_Robots_ROS2_GZ_Simulation.git && \
     git clone --depth 1 -b main                https://github.com/CroboticSolutions/fanuc_description.git && \
-    git clone --depth 1 -b main                https://github.com/CroboticSolutions/fanuc_driver.git && \
+    git clone --depth 1 --recurse-submodules -b main https://github.com/CroboticSolutions/fanuc_driver.git && \
     git clone --depth 1 -b r2000-gazebo        https://github.com/CroboticSolutions/fanuc_gazebo.git && \
     git clone --depth 1 -b hmi-live-controls   https://github.com/bb53192/idustrial_demo_gui && \
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/ros2_robotiq_gripper.git && \
