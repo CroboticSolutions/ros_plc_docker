@@ -1,13 +1,16 @@
 # arms_ws Docker image
 
-Reproduces the full `arms_ws` ROS 2 Jazzy / Gazebo Harmonic workspace
-(FANUC R-2000iC/125L rail cell, CRX-10iA, UR arms, Robotiq gripper,
-`arm_api2`, PLC bridge, ...) so the dev container can be torn down and
-rebuilt on demand.
+Extends Crobotic's `arm_api2` tutorial base image
+([CroboticSolutions/docker_files](https://github.com/CroboticSolutions/docker_files/tree/master/ros2/jazzy/arm_api2))
+-- the exact image this dev container was originally built from -- with
+every other package added to this workspace since: `fanuc_description`,
+`fanuc_driver`, `fanuc_gazebo`, `ros2_robotiq_gripper`, the UR ROS 2
+stack, `ros_plc_sim`, `idustrial_demo_gui`, `ros_gui_bridge`, `serial`,
+and `plc_bridge` (nested inside `plc-ros2-bridge`).
 
-All source repos are cloned fresh from GitHub at build time, at the exact
-branch each one was on when this image was put together. **`ros_gui_bridge`
-is the only private repo** in the set -- everything else is public.
+All repos are cloned fresh from GitHub at build time, at the branch each
+one is currently on. **`ros_gui_bridge` is the only private repo** in the
+set -- everything else is public.
 
 ## Build
 
@@ -19,51 +22,47 @@ ssh-add -l                      # make sure a key with ros_gui_bridge access is 
 DOCKER_BUILDKIT=1 docker build --ssh default -t arms_ws:latest .
 ```
 
-Or with compose:
-
-```bash
-docker compose build
-```
-
 ## Run (with GUI)
 
-Gazebo/RViz windows are forwarded to the host via X11.
+`run_docker.sh` mirrors the original tutorial's `run_docker.sh`:
+`--network host --privileged --gpus all`, `/dev` and the X11 socket
+mounted, and your `SSH_AUTH_SOCK` forwarded in (so `git`/private-repo
+access still works from inside the running container, not just at build
+time).
 
 ```bash
 xhost +local:docker             # allow the container to open windows on your X server
-docker compose run --rm arms_ws
+./run_docker.sh
 ```
 
-Inside the container, ROS/the workspace are already sourced (see
-`entrypoint.sh`). Launch things as usual, e.g.:
+ROS 2 + the workspace are sourced automatically via `.bashrc` (matching
+how the original image does it), so things just work in any shell you
+open in the container, e.g.:
 
 ```bash
 ros2 launch fanuc_gazebo r2000_gz_sim_moveit.launch.py
 ```
 
-`network_mode: host` is used so ROS 2/DDS discovery and Gazebo Transport
-work without extra config -- this only isolates the container's
-filesystem/processes, not its network, so if you need to keep it off the
-host's ROS graph use `ROS_DOMAIN_ID`/`ROS_LOCALHOST_ONLY` as usual.
-
 ## Notes
 
-- The image is built from `ros:jazzy-ros-base` + `ros-jazzy-desktop`,
-  `ros-jazzy-ros-gz` (Gazebo Harmonic), `ros-jazzy-moveit`, the Pilz
-  industrial motion planner, `ros2_control`/`ros2_controllers`,
-  `gz_ros2_control`, and `rqt_joint_trajectory_controller`.
+- Base: Ubuntu 24.04 (Noble) + ROS 2 Jazzy desktop-full + Gazebo Harmonic
+  (via `ros-jazzy-ros-gz-*`) + MoveIt (Servo, Visual Tools, Pilz LIN/PTP/
+  CIRC planner) + `ros2_control`/`gz_ros2_control` +
+  `rqt_joint_trajectory_controller` (used for manually teaching joint
+  waypoints) + `xterm` (keyboard servo teleop).
 - `plc_bridge` is not its own top-level repo -- it lives inside
   `bb53192/plc-ros2-bridge` at `arms_ws/src/plc_bridge` and is symlinked
   into this workspace's `src/`, matching the layout on the original
-  machine (see `plc-bridge-duplicate-package` notes if you have them).
+  machine.
 - `asyncua` (OPC UA) and `pymodbus` (Modbus) are installed via pip for
   the PLC bridge; everything else comes from `rosdep install`.
-- Uncommitted local changes that existed only in the working tree on the
-  original machine (small tweaks in `Universal_Robots_ROS2_Driver`,
+- `arm_api2` is pinned to `crx-integration` here (this workspace's
+  current branch), not the tutorial image's original `apirsic/devel`.
+- Uncommitted local-only changes that existed only in the working tree
+  on the original machine (small tweaks in `Universal_Robots_ROS2_Driver`,
   `ros_plc_sim/scripts/color_classifier.py`, and
   `plc_bridge/plc_bridge/bridge_node.py`) are **not** captured here --
-  only what was committed and pushed. Commit/push those first if you want
-  them included.
-- To rebuild after pushing new commits, just re-run the build -- there's
-  no cache-friendly incremental update; each build re-clones everything
-  at the pinned branch's current HEAD.
+  only what was committed and pushed. Commit/push those first if you
+  want them included.
+- Each build re-clones everything at the pinned branch's current HEAD --
+  there's no incremental/cached rebuild story here.
