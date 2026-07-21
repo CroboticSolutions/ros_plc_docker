@@ -1,7 +1,12 @@
 #!/bin/bash
 # Mirrors CroboticSolutions/docker_files' run_docker.sh (the script this
-# dev container was originally started with) so GPU/X11/SSH-agent
-# forwarding behave the same way.
+# dev container was originally started with) so X11/SSH-agent forwarding
+# behave the same way. --gpus all is dropped: that flag is NVIDIA-Container-
+# Toolkit-specific and fails outright ("no known GPU vendor found") on
+# machines without an NVIDIA GPU/runtime -- integrated graphics (AMD/Intel)
+# just work via Mesa/X11 through the /dev:/dev mount below, no --gpus needed.
+# If you do have an NVIDIA GPU + nvidia-container-toolkit installed, add
+# --gpus all back in.
 
 CONTAINER_NAME=arms_ws_cont
 IMAGE_NAME=arms_ws:latest
@@ -14,7 +19,6 @@ docker run \
   -it \
   --network host \
   --privileged \
-  --gpus all \
   --volume /dev:/dev \
   --volume /tmp/.X11-unix:/tmp/.X11-unix \
   --volume ~/.ssh/ssh_auth_sock:/ssh-agent \
