@@ -104,7 +104,7 @@ RUN pip3 install empy catkin_pkg lark
 # ---------------------------------------------------------------------------
 WORKDIR /root/ros2_ws/src
 RUN git clone --depth 1 -b crx-cell-integration \
-    https://github.com/bb53192/plc-ros2-bridge.git plc-ros2-bridge
+    https://github.com/CroboticSolutions/plc-ros2-bridge.git plc-ros2-bridge
 
 WORKDIR /root/arms_ws/src
 
@@ -112,16 +112,18 @@ RUN git clone -b apirsic/devel https://github.com/CroboticSolutions/arm_api2_msg
 
 # arm_api2 itself is cloned from bb53192's fork (crx-integration branch,
 # private) below, alongside ros_gui_bridge -- both need the ssh-agent.
+# (crx-integration is also mirrored as branch "bbrnic" on
+# CroboticSolutions/arm_api2, in case bb53192's fork ever goes away.)
 
 RUN git clone --depth 1 -b jazzy               https://github.com/UniversalRobots/Universal_Robots_ROS2_Description.git && \
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/Universal_Robots_ROS2_Driver.git && \
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/Universal_Robots_ROS2_GZ_Simulation.git && \
     git clone --depth 1 -b main                https://github.com/CroboticSolutions/fanuc_description.git && \
     git clone --depth 1 --recurse-submodules -b main https://github.com/CroboticSolutions/fanuc_driver.git && \
-    git clone --depth 1 -b r2000-gazebo        https://github.com/CroboticSolutions/fanuc_gazebo.git && \
-    git clone --depth 1 -b hmi-live-controls   https://github.com/bb53192/idustrial_demo_gui && \
+    git clone --depth 1 -b opw-kinematics      https://github.com/bb53192/fanuc_gazebo.git && \
+    git clone --depth 1 -b hmi-live-controls   https://github.com/CroboticSolutions/idustrial_demo_gui.git && \
     git clone --depth 1 -b multiple_ur_robots  https://github.com/CroboticSolutions/ros2_robotiq_gripper.git && \
-    git clone --depth 1 -b pick-on-the-fly     https://github.com/bb53192/ros_plc_sim.git && \
+    git clone --depth 1 -b pick-on-the-fly     https://github.com/CroboticSolutions/ros_plc_sim.git && \
     git clone --depth 1 -b ros2                https://github.com/tylerjw/serial.git
 
 # Private repos -- need the forwarded ssh-agent (--ssh default).
@@ -133,7 +135,7 @@ RUN --mount=type=ssh git clone --depth 1 -b ros2 \
 
 # plc_bridge lives inside plc-ros2-bridge on the real machine and is
 # symlinked into arms_ws/src rather than being its own top-level repo.
-RUN ln -s /root/ros2_ws/src/plc-ros2-bridge/arms_ws/src/plc_bridge /root/arms_ws/src/plc_bridge
+RUN ln -s /root/ros2_ws/src/plc-ros2-bridge/plc_bridge /root/arms_ws/src/plc_bridge
 
 # ---------------------------------------------------------------------------
 # rosdep + build
