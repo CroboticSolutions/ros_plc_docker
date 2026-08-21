@@ -49,16 +49,24 @@ docker run -d \
 
 - `--network host` je bitan (ne `-p 8443:8443`) — bez toga OPC UA (4840) i Modbus (502)
   portovi nisu dostupni bridgevima
-- Nakon pokretanja: `https://localhost:8443` — u ovom projektu se to koristi kao web UI
-  (login `user`/`1234`) za konfiguraciju OPC UA/Modbus varijabli i upload PLC programa.
-  (Napomena: službeni README najnovije verzije tvrdi da nema browser UI-ja u `latest` tagu
-  nego se sve radi preko desktop OpenPLC Editor aplikacije preko REST API-ja — ako
-  `https://localhost:8443` ne radi kao web UI, to je vjerojatno razlog; provjeri koju
-  verziju/tag stvarno voziš.)
 - PLC projekt koji se uploada je [CroboticSolutions/openplc](https://github.com/CroboticSolutions/openplc)
   (`PLC_project/` folder) — vidi taj repo za sadržaj/postavljanje
 - Fork za buildanje vlastite verzije runtimea: [CroboticSolutions/openplc-runtime](https://github.com/CroboticSolutions/openplc-runtime)
   (trenutno identičan upstreamu, `Autonomy-Logic/openplc-runtime`, spreman za buduće izmjene)
+
+### Prvo pokretanje (kroz OpenPLC Editor, ne browser)
+
+Runtime nema web UI — sve ide kroz desktop **OpenPLC Editor** aplikaciju
+([CroboticSolutions/openplc-editor](https://github.com/CroboticSolutions/openplc-editor)),
+koja se preko REST API-ja (port 8443) spaja na runtime:
+
+1. Pokreni OpenPLC Editor
+2. **Open Project** → otvori `PLC_project/` (klon od `CroboticSolutions/openplc`)
+3. Spoji se na runtime — upiši credentials: **`admin` / `1234`**
+4. **Run** — kompajlira i deploya program na runtime
+
+Nakon ovoga, runtime izvršava program i `bridge` prozor svake simulacije će se uspješno
+spojiti preko OPC UA (4840).
 
 ---
 
