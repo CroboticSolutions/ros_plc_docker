@@ -18,6 +18,14 @@ tmux list-sessions
 ps aux | grep -E "gz sim|move_group" | grep -v grep
 ```
 
+**Prije PRVOG pokretanja bilo koje GUI simulacije, na HOSTU (ne u ovom containeru):**
+```bash
+xhost +local:
+```
+Bez ovoga: Gazebo/rviz2 prozori se ne prikazuju (simulacija se svejedno pokrene i radi u
+pozadini, izgleda kao da je "headless" ali nije — X socket je dostupan, samo container nema
+`~/.Xauthority` pa X server odbija autorizaciju). Vidi §Troubleshooting.
+
 ---
 
 ## 0. Preduvjet: OpenPLC Runtime (VAN ovog containera!)
@@ -136,3 +144,5 @@ kamere, klasifikatori, orkestrator). Nema ručnog triggera, sam spawn-a dijelove
 | CNC job "future timeout" nakon ~20-80s | `arm_api2` nije pokrenut | pokreni `moveit2_simple_iface.launch.py` (vidi §2) |
 | Robot ne reagira na `/manual/*` ili `/plc/*` iako je sve gore | cell_mode u AUTO umjesto MANUAL | `ros2 service call /cell/set_mode std_srvs/srv/SetBool "{data: false}"` |
 | Računalo usporava bez razloga | zaboravljena tmux sesija od prije | `tmux list-sessions`, ugasi sve što ne koristiš |
+| Gazebo/rviz prozori se ne prikazuju iako je sve u logu OK ("izgleda headless") | nema X11 autorizacije za container (`~/.Xauthority` ne postoji) | na HOSTU: `xhost +local:` (ili uže `xhost +si:localuser:root`), pa restartaj sesiju |
+| `docker run` za OpenPLC Runtime javlja "Conflict... name already in use" | container već postoji od prije | `docker start openplc-runtime` (ako je Exited), ili `docker rm -f openplc-runtime` pa ponovno `docker run` |
