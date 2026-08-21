@@ -20,6 +20,40 @@ ps aux | grep -E "gz sim|move_group" | grep -v grep
 
 ---
 
+## 0. Preduvjet: OpenPLC Runtime (VAN ovog containera!)
+
+Sve tri simulacije imaju `bridge` prozor (`plc_bridge`) koji se spaja na OpenPLC Runtime
+preko OPC UA (port 4840). **`docker` naredba ne postoji unutar ovog containera** — Runtime
+mora biti pokrenut kao ZASEBAN, susjedni container **na hostu**, ne odavde. Ako ga ne
+pokreneš prvo, `bridge` prozor svake simulacije pući će s `ConnectionRefusedError` (ostatak
+simulacije i dalje radi normalno preko MANUAL/ROS puta — samo PLC/AUTO put ne radi).
+
+Na hostu (ne u ovom containeru):
+```bash
+docker run -d \
+  --name openplc-runtime \
+  --network host \
+  --cap-add=SYS_NICE \
+  --cap-add=SYS_RESOURCE \
+  -v openplc-runtime-data:/var/run/runtime \
+  ghcr.io/autonomy-logic/openplc-runtime:latest
+```
+
+- `--network host` je bitan (ne `-p 8443:8443`) — bez toga OPC UA (4840) i Modbus (502)
+  portovi nisu dostupni bridgevima
+- Nakon pokretanja: `https://localhost:8443` — u ovom projektu se to koristi kao web UI
+  (login `user`/`1234`) za konfiguraciju OPC UA/Modbus varijabli i upload PLC programa.
+  (Napomena: službeni README najnovije verzije tvrdi da nema browser UI-ja u `latest` tagu
+  nego se sve radi preko desktop OpenPLC Editor aplikacije preko REST API-ja — ako
+  `https://localhost:8443` ne radi kao web UI, to je vjerojatno razlog; provjeri koju
+  verziju/tag stvarno voziš.)
+- PLC projekt koji se uploada je [CroboticSolutions/openplc](https://github.com/CroboticSolutions/openplc)
+  (`PLC_project/` folder) — vidi taj repo za sadržaj/postavljanje
+- Fork za buildanje vlastite verzije runtimea: [CroboticSolutions/openplc-runtime](https://github.com/CroboticSolutions/openplc-runtime)
+  (trenutno identičan upstreamu, `Autonomy-Logic/openplc-runtime`, spreman za buduće izmjene)
+
+---
+
 ## 1. CRX gripper-cell (traka + pick&place, PLC-vozeno) — `./start_crx_cell.sh`
 
 Jedan CRX-10iA + Robotiq gripper, traka, PLC (OpenPLC) vozi AUTO/MANUAL logiku.
