@@ -154,4 +154,11 @@ RUN /bin/bash -c "source /opt/ros/jazzy/setup.bash && \
 RUN echo "source ${PY_VENV}/bin/activate" >> $HOME/.bashrc
 RUN echo "source /root/arms_ws/install/setup.bash" >> ~/.bashrc
 
+# ---------------------------------------------------------------------------
+# Sim launch scripts (tmux, one per simulation) + usage runbook -- see
+# RUNBOOK.md for what each start_*.sh does and known gotchas.
+# ---------------------------------------------------------------------------
+COPY start_crx_cell.sh start_cnc_tending.sh start_dual_arm_sort.sh RUNBOOK.md /root/arms_ws/
+RUN chmod +x /root/arms_ws/start_crx_cell.sh /root/arms_ws/start_cnc_tending.sh /root/arms_ws/start_dual_arm_sort.sh
+
 CMD ["bash"]
